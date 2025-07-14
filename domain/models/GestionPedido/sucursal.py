@@ -6,5 +6,4 @@ class Sucursal(db.Model):
     nombre = db.Column(db.String(100))
     direccion = db.Column(db.String(150))
     telefono = db.Column(db.String(20))
-
     bodegas = db.relationship('Bodega', back_populates='sucursal')
