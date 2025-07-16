@@ -19,7 +19,7 @@ class Usuario(db.Model):
         'estado': self.estado,
     }
     def getPersona(self, id_p):
-        from models.persona import Persona
+        from models.GestionAcceso.persona import Persona
         return Persona.query.filter_by(id = id_p).first()
 
     def copy(self, value):

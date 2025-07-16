@@ -20,12 +20,15 @@ def create_app():
         from routes.api_persona import api_persona
         from routes.api_rol import api_rol
         from routes.api_pedido import api_pedido
+        from routes.api_sucursal import api_sucursal
+        from routes.api_bodega import api_bodega
 
         app.register_blueprint(api)
         app.register_blueprint(api_persona)
         app.register_blueprint(api_rol)
         app.register_blueprint(api_pedido)
-
+        app.register_blueprint(api_sucursal)
+        app.register_blueprint(api_bodega)
 
         db.create_all()
         #db.drop_all()

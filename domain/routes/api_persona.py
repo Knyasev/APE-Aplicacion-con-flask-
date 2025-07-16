@@ -10,10 +10,10 @@ personaC= PersonaController()
 schema_sesion = {
     "type": "object",
     'properties': {
-        "usuario": {"type": "string"},
+        "username": {"type": "string"},
         "clave": {"type": "string"},
     },
-    'required': ["usuario", "clave"]
+    'required': ["username", "clave"]
 }
 schema = {
     'type': 'object',
@@ -31,11 +31,11 @@ schema_usuario= {
     'properties': {
         'nombre': {'type': 'string'},
         'apellido': {'type': 'string'},
-        'correo': {'type': 'string',
+        'username  ': {'type': 'string',
                    "pattern": "^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$"},
         'clave': {'type': 'string'},
     },
-    'required': ['nombre', 'apellido', 'correo', 'clave']
+    'required': ['nombre', 'apellido', 'username', 'clave']
 }
 @api_persona.route("/persona")
 @token_required
@@ -174,6 +174,7 @@ def desactivar(external_id):
 @expects_json(schema_sesion)
 def session():
     data = request.json
+    print("los datos son: " + str(data))
     id = personaC.inicio_sesion(data)
     print("el id es: "+ str(id))
 

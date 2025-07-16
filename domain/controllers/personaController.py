@@ -55,7 +55,7 @@ class PersonaController:
                 db.session.add(persona)
                 db.session.commit()
                 usuario = Usuario()
-                usuario.username = data.get("correo")
+                usuario.username = data.get("username")
                 # Encriptar la clave
                 usuario.clave = generate_password_hash(data.get("clave"))
                 usuario.persona_id = persona.id
@@ -81,7 +81,7 @@ class PersonaController:
                 db.session.add(persona)
                 db.session.commit()
                 usuario = Usuario()
-                usuario.username = data.get("correo")
+                usuario.username = data.get("username")
                 # Encriptar la clave
                 usuario.clave = generate_password_hash(data.get("clave"))
                 usuario.persona_id = persona.id
@@ -107,7 +107,7 @@ class PersonaController:
                 db.session.add(persona)
                 db.session.commit()
                 usuario = Usuario()
-                usuario.usuario = data.get("correo")
+                usuario.username = data.get("username")
                 # Encriptar la clave
                 usuario.clave = generate_password_hash(data.get("clave"))
                 usuario.persona_id = persona.id
@@ -184,7 +184,7 @@ class PersonaController:
         
 
     def inicio_sesion(self, data):
-        usuarioA = usuario.query.filter_by(usuario = data.get('usuario')).first()
+        usuarioA = Usuario.query.filter_by(username = data.get('username')).first()
         if usuarioA:
             # Verificar la clave
             if check_password_hash(usuarioA.clave, data["clave"]):
@@ -196,7 +196,7 @@ class PersonaController:
                     key = current_app.config["SECRET_KEY"],
                     algorithm="HS512"
                 )
-                usuario = usuario.query.get(usuarioA.id)
+                usuario = Usuario.query.get(usuarioA.id)
                 persona = usuario.getPersona(usuarioA.persona_id)
                 info = {
                     "token": token,
