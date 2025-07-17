@@ -1,3 +1,6 @@
+import uuid
+from app import db
+
 class Inventario(db.Model):
     __tablename__ = 'inventario'
     

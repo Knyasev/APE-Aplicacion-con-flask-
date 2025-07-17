@@ -12,5 +12,6 @@ from models.GestionInventario.alertastock import AlertaStock
 from models.GestionInventario.itemInventario import ItemInventario
 from models.GestionPedido.detallePedido import DetallePedido
 from models.GestionInventario.stock import Stock
+from models.GestionInventario.inventario import Inventario
 
 api = Blueprint('api', __name__)
