@@ -14,3 +14,14 @@
 /domain/config/__pycache__
 /domain/__pycache__
 /domain/__pycache__
+/domain/models/GestionInventario/__pycache__
+/domain/models/GestionAcceso/__pycache__
+/domain/models/GestionInventario/__pycache__
+/domain/models/GestionInventario/Enums/__pycache__
+/domain/models/GestionPedido/Enums/__pycache__
+/domain/routes/__pycache__
+/domain/models/GestionPedido/__pycache__
+/domain/models/GestionAcceso/__pycache__
+/domain/controllers/__pycache__
+/domain/config/__pycache__
+/domain/__pycache__
