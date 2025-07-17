@@ -7,8 +7,10 @@ from models.GestionInventario.producto import Producto
 from models.GestionPedido.pedido import Pedido
 from models.GestionPedido.sucursal import Sucursal
 from models.GestionInventario.bodega import Bodega
-from models.GestionInventario.movimientoinventario import MovimientoInventario
 from models.GestionInventario.categoriaproducto import CategoriaProducto
 from models.GestionInventario.alertastock import AlertaStock
+from models.GestionInventario.itemInventario import ItemInventario
+from models.GestionPedido.detallePedido import DetallePedido
+from models.GestionInventario.stock import Stock
 
 api = Blueprint('api', __name__)

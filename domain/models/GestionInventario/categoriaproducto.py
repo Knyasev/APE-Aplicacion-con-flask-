@@ -8,3 +8,16 @@ class CategoriaProducto(db.Model):
     nombre = db.Column(db.String(100))
     descripcion = db.Column(db.String(200))
     productos = db.relationship('Producto', back_populates='categoria')
+
+    def serialize(self):
+        return {
+            'id': self.id,
+            'nombre': self.nombre,
+            'descripcion': self.descripcion,
+            'external_id': self.external_id
+        }
+        
+    def copy(self, value):
+        self.nombre = value.get('nombre')
+        self.descripcion = value.get('descripcion', '')
+        self.external_id = str(uuid.uuid4())
