@@ -8,5 +8,4 @@ class AlertaStock(db.Model):
     cantidad_actual = db.Column(db.Integer)
     estado = db.Column(db.Boolean)
 
-    producto_id = db.Column(db.Integer, db.ForeignKey('producto.id'))
-    producto = db.relationship('Producto', back_populates='alertas')    
+      

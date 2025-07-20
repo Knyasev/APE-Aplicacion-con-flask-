@@ -13,6 +13,7 @@ def token_required(f):
     def decored(*args, **kwargs):
         token = None
         if 'X-Access-Tokens' in request.headers:
+            print(request.headers)
             token = request.headers['X-Access-Tokens']
         if not token:
             return make_response(

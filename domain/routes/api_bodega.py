@@ -1,7 +1,7 @@
 from flask import Blueprint, jsonify, make_response, request
 from controllers.bodegaController import BodegaController
 api_bodega = Blueprint('api_bodega', __name__)
-
+from controllers.authenticate import token_required
 bodegaC = BodegaController()
 
 @api_bodega.route("/bodega")
@@ -11,7 +11,7 @@ def listar_bodegas():
         200
     )
     
-
+@token_required
 @api_bodega.route("/bodega/guardar", methods=["POST"])
 def guardar_bodega():
     data = request.get_json()

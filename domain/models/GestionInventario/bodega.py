@@ -10,10 +10,9 @@ class Bodega(db.Model):
     ubicacion = db.Column(db.String(150))
     capacidad_maxima = db.Column(db.Numeric(10, 2))
     estado = db.Column(db.Boolean, default=True)
-    bodeguero_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
-    bodeguero = db.relationship('Usuario', back_populates='bodegas')
+    usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))  # Clave foránea
+    usuario = db.relationship('Usuario', back_populates='bodega')  # Relación inversa
     
-    productos = db.relationship('Producto', back_populates='bodega')
     movimientos = db.relationship('ItemInventario', back_populates='bodega')
 
     def serialize(self):

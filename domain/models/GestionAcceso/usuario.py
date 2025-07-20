@@ -11,7 +11,9 @@ class Usuario(db.Model):
     persona_id = db.Column(db.Integer, db.ForeignKey('persona.id'), nullable=False)
     persona = db.relationship('Persona', back_populates='usuario', lazy=True)
     pedidos = db.relationship('Pedido', back_populates='usuario')
-
+    productos_creados = db.relationship('Producto', back_populates='admin')
+    sucursales = db.relationship('Sucursal', back_populates='admin')  # Relación inversa
+    bodega = db.relationship('Bodega', back_populates='usuario')  # Relación inversa
     def serialize(self):
         return {
         'username': self.username,

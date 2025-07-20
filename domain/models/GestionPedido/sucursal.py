@@ -11,10 +11,9 @@ class Sucursal(db.Model):
     estado = db.Column(db.Boolean, default=True)
     fecha_registro = db.Column(db.DateTime, default=datetime.utcnow)
     external_id = db.Column(db.String(60), default=str(uuid.uuid4()), nullable=False)
-    usuarios = db.relationship('Usuario', backref='sucursal', lazy=True)
-    bodegas = db.relationship('Bodega', backref='sucursal', lazy=True)
-    pedidos = db.relationship('Pedido', backref='sucursal', lazy=True)
-
+    admin_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))  # Clave foránea
+    admin = db.relationship('Usuario', back_populates='sucursales')  # Relación
+    pedidos = db.relationship('Pedido', back_populates='sucursal')  # Relación
     def serialize(self):
         return {
             'id': self.id,

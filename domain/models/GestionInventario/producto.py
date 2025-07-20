@@ -18,7 +18,7 @@ class Producto(db.Model):
     
     admin_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))
     admin = db.relationship('Usuario', back_populates='productos_creados')
-
+    stock = db.relationship('Stock', uselist=False, back_populates='producto')  # Relación uno a uno
     movimientos = db.relationship('ItemInventario', back_populates='producto')
 
     def serialize(self):
@@ -39,7 +39,7 @@ class Producto(db.Model):
         self.nombre = value.get('nombre')
         self.tipo = value.get('tipo')
         self.descripcion = value.get('descripcion', '')
-        self.estado = EstadoProducto(value.get('estado', EstadoProducto.ACTIVO).upper())
+        self.estado = EstadoProducto(value.get('estado').upper())
         self.stock_actual = value.get('stock_actual', 0)
         self.categoria_id = value.get('categoria_id', None)
         self.bodega_id = value.get('bodega_id', None)

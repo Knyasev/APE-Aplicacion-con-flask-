@@ -26,4 +26,13 @@ def guardar_pedido():
             400
         )
 
+@api_pedido.route('/pedido/sucursal/<sucursal_id>/usuario/<usuario_id>', methods=['GET'])
+def listar_porSucursal(sucursal_id, usuario_id):
+    try:
+        pedidos = pedidoC.listar_porSucursal(sucursal_id, usuario_id)
+        return jsonify({"msg": "OK", "code": 200, "datos": pedidos}), 200
+    except Exception as e:
+        return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500
+
+
 
