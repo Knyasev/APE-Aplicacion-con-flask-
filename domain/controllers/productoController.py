@@ -30,7 +30,6 @@ class ProductoController():
         producto = Producto()
         producto.codigo = data.get("codigo")
         producto.nombre = data.get("nombre")
-        producto.tipo = data.get("tipo")
         producto.descripcion = data.get("descripcion", '')
         producto.estado = data.get("estado")
         producto.stock_actual = data.get("stock_actual", 0)
@@ -61,6 +60,15 @@ class ProductoController():
         db.session.add(categoria)
         db.session.commit()
         return categoria.id
+
+    def obtener_categoria(self):
+        return CategoriaProducto.query.all()
+
+    def obtener_categoria_id(self, categoria_id):
+        categoria = CategoriaProducto.query.get(categoria_id)
+        if not categoria:
+            raise Exception("Categoria no encontrada")
+        return categoria
 
     def obtener_nombre_producto(self, producto_id):
         producto = Producto.query.get(producto_id)

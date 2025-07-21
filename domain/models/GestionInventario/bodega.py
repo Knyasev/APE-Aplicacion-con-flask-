@@ -14,7 +14,7 @@ class Bodega(db.Model):
     usuario = db.relationship('Usuario', back_populates='bodega')  # Relación inversa
     
     movimientos = db.relationship('ItemInventario', back_populates='bodega')
-
+    @property
     def serialize(self):
         return {
             'id': self.id,

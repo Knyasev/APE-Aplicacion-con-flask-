@@ -6,8 +6,10 @@ productoC = ProductoController()
 
 @api_producto.route("/producto", methods=["GET"])
 def listar_productos():
-    productos = productoC.listar_productos()
-    return jsonify([producto.to_dict() for producto in productos]), 200
+    return make_response(
+        jsonify({"msg": "OK", "code": 200, "datos": ([i.serialize for i in productoC.listar_productos()])}),
+        200
+    )
 
 
 @api_producto.route("/producto/guardar",methods=["POST"])
@@ -41,6 +43,34 @@ def actualizar_producto(external_id):
             500
         )
 
+@api_producto.route("/producto/<external_id>", methods=["GET"])
+def buscar_producto(external_id):
+    producto = productoC.buscar_producto(external_id)
+    if producto:
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": producto.serialize}),
+            200
+        )
+    else:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Producto no encontrado"}}),
+            404
+        )
+
+@api_producto.route("/producto/categoria/<categoria_id>", methods=["GET"])
+def obtener_categoria_id(categoria_id):
+    try:
+        categoria = productoC.obtener_categoria_id(categoria_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": categoria.serialize}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 500, "datos": {"error": str(e)}}),
+            500
+        )
+
 @api_producto.route("/categoria/guardar", methods=["POST"])
 def registrar_categoria():
     data = request.get_json()
@@ -55,6 +85,13 @@ def registrar_categoria():
             jsonify({"msg": "ERROR", "code": 400, "datos": {"error": "Error al guardar la categoria"}}),
             400
         )
+
+@api_producto.route("/categoria")
+def obtener_categoria():
+    return make_response(
+        jsonify({"msg": "OK", "code": 200, "datos": ([i.serialize for i in productoC.obtener_categoria()])}),
+        200
+    )
 
 
 @api_producto.route("/producto/nombre/<producto_id>", methods=["GET"])

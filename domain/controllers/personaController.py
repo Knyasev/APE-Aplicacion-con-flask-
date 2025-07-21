@@ -123,18 +123,18 @@ class PersonaController:
         
     
 
-    def buscar_external(self, external):
-        return Persona.query.filter_by(external_id=external).first()
+    def buscar_external(self, external_id):
+        return Persona.query.filter_by(external_id=external_id).first()
     
     
     def modificar_usuario(self, data,external_id):
-        usuario = usuario.query.filter_by(external_id=external_id).first()
+        usuario = Usuario.query.filter_by(external_id=external_id).first()
         if usuario:
             persona = Persona.query.filter_by(id=usuario.persona_id).first()
             if persona:
                 persona.apellido = data.get("apellido", persona.apellido)
                 persona.nombre = data.get("nombre", persona.nombre)
-                usuario.usuario = data.get("correo", usuario.usuario)
+                usuario.username = data.get("correo", usuario.username)
                 usuario.clave = generate_password_hash(data.get("clave")) if data.get("clave") else usuario.clave
                 db.session.commit()
                 return usuario.id
@@ -210,4 +210,7 @@ class PersonaController:
                 return -5
         else:
             return -5
+
+
+
         

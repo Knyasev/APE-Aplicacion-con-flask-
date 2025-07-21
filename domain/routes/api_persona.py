@@ -112,16 +112,19 @@ def modificar_cuenta_api(external_id):
         return jsonify({"msg": "OK", "code": 200, "datos": {"tag":"Datos Guardados"}}), 200
     
 
-@api_persona.route("/persona/<external>")
-def buscar_external(external):
-    search = personaC.buscar_external(external)
-    if search is not None:
-        search = search.serialize
-    return make_response(
-        jsonify({"msg": "OK", "code": 200, "datos": [] if search is None else search}),
-        200
-    )
-
+@api_persona.route("/persona/<external_id>")
+def buscar_external(external_id):
+    persona = personaC.buscar_external(external_id)
+    if persona:
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": persona.serialize}),
+            200
+        )
+    else:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Persona no encontrada"}}),
+            404
+        )
 
 # Ruta para modificar un censo
 @api_persona.route("/persona/<external_id>", methods=['POST'])
@@ -137,23 +140,6 @@ def modificar(external_id):
     search = persona.serialize()
     return make_response(jsonify({"msg": "OK", "code": 200, "datos": search}), 200)
 
-
-@api_persona.route("/persona/<external_id>", methods=['POST'])
-def api_modificar_censador(external_id):
-    data = request.get_json()  # Obtiene los datos del cuerpo de la solicitud HTTP
-    if data is None:
-        return make_response(jsonify({"msg" : "ERROR", "code" : 400, "datos" :{"error" : Error.error[str(id)]}}), 
-            400
-        )
-
-    persona = personaC.modificar_censador(external_id, data)
-    search = persona.serialize()
-
-    if persona is None or persona == -1:
-        return make_response(jsonify({"msg" : "ERROR", "code" : 400, "datos" :{"error" : Error.error[str(id)]}}), 
-            400
-        )
-    return make_response(jsonify({"msg": "OK", "code": 200, "datos": search}), 200)
 
 
 @api_persona.route("/persona/<external_id>/desactivar", methods=['GET'])

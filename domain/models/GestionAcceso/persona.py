@@ -18,8 +18,9 @@ class Persona(db.Model):
         'nombre': self.nombre,
         'apellido': self.apellido,
         'external_id': self.external_id,
-        'cuenta': [cuenta.serialize() for cuenta in self.cuenta if cuenta.estado == 1],
+        'usuario': [usuario.serialize() for usuario in self.usuario if usuario.estado == 1],
         'rol': self.rol.serialize() if self.rol else None,
+        'id': self.id
     }
 
 

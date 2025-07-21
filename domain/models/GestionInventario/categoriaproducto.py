@@ -9,6 +9,7 @@ class CategoriaProducto(db.Model):
     descripcion = db.Column(db.String(200))
     productos = db.relationship('Producto', back_populates='categoria')
 
+    @property
     def serialize(self):
         return {
             'id': self.id,
@@ -16,7 +17,7 @@ class CategoriaProducto(db.Model):
             'descripcion': self.descripcion,
             'external_id': self.external_id
         }
-        
+
     def copy(self, value):
         self.nombre = value.get('nombre')
         self.descripcion = value.get('descripcion', '')

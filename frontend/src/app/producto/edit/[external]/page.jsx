@@ -1,28 +1,40 @@
 'use client';
-import { useEffect, useState } from 'react';
-import Cookies from 'js-cookie';
-import { create_product, get_categoria } from "@/hooks/Services_product";
-import { get_person } from "@/hooks/Services_person";
-import { useForm } from 'react-hook-form';
-import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
+import { yupResolver } from '@hookform/resolvers/yup';
+import { useForm } from 'react-hook-form';
 import swal from 'sweetalert';
+import Cookies from 'js-cookie';
 import { useRouter } from 'next/navigation';
+import { useState, useEffect } from 'react';
+import { get_categoria, get_product_external, update_product } from '@/hooks/Services_product';
+import { get_person } from '@/hooks/Services_person';
 
-export default function New() {
+export default function Edit({ params }) {
     const router = useRouter();
     const [categorias, setCategorias] = useState([]);
     const [usuario, setUsuario] = useState(null);
+    const [producto, setProducto] = useState(null);
     const token = Cookies.get('token');
-    const external_id = Cookies.get('external_id');
+    const external_id = Cookies.get('external');
+    const productExternalId = params.external;
+
+    // Schema de validación simplificado
+    const validationSchema = Yup.object().shape({
+        nombre: Yup.string().required('El nombre es requerido'),
+        codigo: Yup.string().required('El código es requerido'),
+        descripcion: Yup.string().required('La descripción es requerida'),
+        categoria_id: Yup.string().required('La categoría es requerida'),
+        stock_actual: Yup.number().required('El stock es requerido').min(0, 'El stock no puede ser negativo')
+    });
+
+    const formOptions = { resolver: yupResolver(validationSchema) };
+    const { register, handleSubmit, formState: { errors }, setValue } = useForm(formOptions);
 
     useEffect(() => {
         // Cargar categorías
         get_categoria(token).then((info) => {
             if (info.code == '200') {
                 setCategorias(info.datos);
-            } else {
-                setCategorias([]);
             }
         });
 
@@ -34,36 +46,41 @@ export default function New() {
                 }
             });
         }
-    }, [token, external_id]);
-
-    const validationSchema = Yup.object().shape({
-        nombre: Yup.string().required('El nombre es requerido'),
-        codigo: Yup.string().required('El código es requerido'),
-        descripcion: Yup.string().required('La descripción es requerida'),
-        categoria_id: Yup.string().required('La categoría es requerida'),
-        stock_actual: Yup.number().required('El stock es requerido').min(0, 'El stock no puede ser negativo')
-    });
-
-    const formOptions = { resolver: yupResolver(validationSchema) };
-    const { register, handleSubmit, formState: { errors } } = useForm(formOptions);
+            
+        // Cargar datos del producto a editar
+        if (productExternalId) {
+            get_product_external({ external: productExternalId }, token).then((info) => {
+                if (info.code == '200') {
+                    setProducto(info.datos);
+                    
+                    // Establecer valores en el formulario (solo campos necesarios)
+                    setValue('nombre', info.datos.nombre);
+                    setValue('codigo', info.datos.codigo);
+                    setValue('descripcion', info.datos.descripcion);
+                    setValue('categoria_id', info.datos.categoria_id);
+                    setValue('stock_actual', info.datos.stock_actual);
+                }
+            });
+        }
+    }, [token, external_id, productExternalId, setValue]);
 
     const sendInfo = async (data) => {
         const productoData = {
             nombre: data.nombre,
             codigo: data.codigo,
             descripcion: data.descripcion,
-            estado: 'BUENO',
+            estado: 'BUENO', // Estado fijo
             categoria_id: data.categoria_id,
             stock_actual: data.stock_actual,
             admin_id: usuario?.id
         };
 
-        const info = await create_product(productoData, token);
-        
-        if (info && info.status == '200') {
+        const info = await update_product(productoData, { external: productExternalId }, token);
+        console.log("Respuesta de actualización:", info);
+        if (info && info.code == '200') {
             swal({
-                title: "Registro exitoso",
-                text: "Producto registrado correctamente",
+                title: "Actualización exitosa",
+                text: "Producto actualizado correctamente",
                 icon: "success",
                 button: "Aceptar",
                 timer: 4000,
@@ -73,7 +90,7 @@ export default function New() {
         } else {
             swal({
                 title: "Error",
-                text: info ? info.datos.error : "Error al registrar el producto",
+                text: info ? info.datos.error : "Error al actualizar el producto",
                 icon: "error",
                 button: "Aceptar",
                 timer: 4000,    
@@ -84,7 +101,7 @@ export default function New() {
 
     return (
         <div className="container text-center mt-5" style={{width: "60%", border: "2px solid black", padding: "20px", borderRadius: "15px", margin: "auto"}}>
-            <h2>Nuevo Producto</h2>
+            <h2>Editar Producto</h2>
             <form onSubmit={handleSubmit(sendInfo)} className="form-signin">
                 <div className="mb-3">
                     <label className="form-label">Nombre:</label>
@@ -121,7 +138,7 @@ export default function New() {
                     {errors.stock_actual && <div className="text-danger">{errors.stock_actual?.message}</div>}
                 </div>
                 
-                <button type="submit" className="w-100 btn btn-lg btn-primary">Registrar Producto</button>
+                <button type="submit" className="w-100 btn btn-lg btn-primary">Actualizar Producto</button>
             </form>
         </div>
     );

@@ -3,6 +3,7 @@ import axios from 'axios';
 
 // Metodo POST
 export const POST = async (resource, data, token = "NONE") => {
+    console.log("POST: " + URL + resource+ " - " + JSON.stringify(data));
     let headers = {
         headers: {
             "Accept": "application/json",

@@ -43,11 +43,11 @@ export async function get_estados(token){
     // TODO agarrar errores
 }    
 
-export async function  get_person(token,params){
+export async function  get_person(token,external){
     let datos = null;
     try {
 
-        datos = await GET('person/'+params.external,token);
+        datos = await GET('persona/'+external,token);
     } catch (error) {
         console.log(error.response.data);
         return{"code": 500}
