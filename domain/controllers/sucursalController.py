@@ -2,7 +2,7 @@ from models.GestionPedido.sucursal import Sucursal
 from app import db
 import uuid
 from controllers.utils.errors import Error
-
+from datetime import datetime
 class SucursalController:
     def listar(self):
         return Sucursal.query.all()
@@ -12,6 +12,9 @@ class SucursalController:
         sucursal.nombre = data.get("nombre")
         sucursal.direccion = data.get("direccion")
         sucursal.telefono = data.get("telefono")
+        sucursal.estado = data.get("estado", True)  
+        sucursal.admin_id = data.get("admin_id")
+        sucursal.fecha_registro = datetime.utcnow()
         sucursal.external_id = uuid.uuid4()
         db.session.add(sucursal)
         db.session.commit()

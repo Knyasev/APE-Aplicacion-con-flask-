@@ -1,5 +1,6 @@
 from flask import Blueprint, jsonify, make_response, request
 from controllers.sucursalController import SucursalController
+from controllers.authenticate import token_required
 api_sucursal = Blueprint('api_sucursal', __name__)
 
 sucursalC = SucursalController()
@@ -12,6 +13,7 @@ def listar_sucursales():
     )
 
 @api_sucursal.route("/sucursal/guardar", methods=["POST"])
+@token_required
 def guardar_sucursal():
     data = request.get_json()
     id = sucursalC.registrar_sucursal(data)

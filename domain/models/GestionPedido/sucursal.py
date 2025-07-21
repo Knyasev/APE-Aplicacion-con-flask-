@@ -20,6 +20,7 @@ class Sucursal(db.Model):
             'nombre': self.nombre,
             'ubicacion': self.ubicacion,
             'estado': self.estado,
+            'admin_id': self.admin_id,
             'fecha_registro': self.fecha_registro.isoformat(),
             'external_id': str(uuid.uuid4())
         }

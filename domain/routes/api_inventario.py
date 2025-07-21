@@ -1,11 +1,13 @@
 from models.GestionInventario.inventario import Inventario
 from controllers.inventarioController import InventarioController
 from flask import Blueprint, jsonify, make_response, request
+from controllers.authenticate import token_required
 api_inventario = Blueprint('api_inventario', __name__)
 inventarioC = InventarioController()
 
 
 @api_inventario.route('/inventario/entrada', methods=['POST'])
+@token_required(roles_permitidos=["BODEGUERO"])
 def registrar_entrada():
     data = request.get_json()
     try:

@@ -32,3 +32,5 @@
 /domain/controllers/__pycache__
 /domain/controllers/utils/__pycache__
 /domain/__pycache__
+/domain/models/GestionAcceso/__pycache__
+/domain/models/GestionInventario/__pycache__
