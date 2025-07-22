@@ -13,7 +13,7 @@ def listar_sucursales():
     )
 
 @api_sucursal.route("/sucursal/guardar", methods=["POST"])
-@token_required
+@token_required()
 def guardar_sucursal():
     data = request.get_json()
     id = sucursalC.registrar_sucursal(data)
@@ -64,6 +64,36 @@ def activar_sucursal(external_id):
         sucursal = sucursalC.activar_sucursal(external_id)
         return make_response(
             jsonify({"msg": "OK", "code": 200, "datos": {"tag": "Sucursal Activada"}}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": str(e)}}),
+            404
+        )
+
+
+@api_sucursal.route("/sucursal/<external_id>", methods=["GET"])
+def buscar_sucursal(external_id):
+    sucursal = sucursalC.buscar_external(external_id)
+    if sucursal:
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": sucursal.serialize}),
+            200
+        )
+    else:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Sucursal no encontrada"}}),
+            404
+        )
+
+
+@api_sucursal.route("/sucursal/id/<int:sucursal_id>", methods=["GET"])
+def get_sucursal_by_id(sucursal_id):
+    try:
+        sucursal = sucursalC.get_sucursal_by_id(sucursal_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": sucursal.serialize}),
             200
         )
     except Exception as e:

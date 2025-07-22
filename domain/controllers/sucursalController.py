@@ -10,7 +10,7 @@ class SucursalController:
     def registrar_sucursal(self, data):
         sucursal = Sucursal()
         sucursal.nombre = data.get("nombre")
-        sucursal.direccion = data.get("direccion")
+        sucursal.ubicacion = data.get("ubicacion")
         sucursal.telefono = data.get("telefono")
         sucursal.estado = data.get("estado", True)  
         sucursal.admin_id = data.get("admin_id")
@@ -56,3 +56,10 @@ class SucursalController:
             return sucursal
         else:
             raise Error("Sucursal no encontrada", 404)
+
+
+    def get_sucursal_by_id(self, sucursal_id):
+        sucursal = Sucursal.query.get(sucursal_id)
+        if not sucursal:
+            raise Error("Sucursal no encontrada", 404)
+        return sucursal

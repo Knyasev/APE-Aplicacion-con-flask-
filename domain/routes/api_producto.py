@@ -94,6 +94,38 @@ def obtener_categoria():
     )
 
 
+@api_producto.route("/categoria/<external_id>", methods=["GET"])
+def buscar_categoria(external_id):
+    categoria = productoC.buscar_categoria(external_id)
+    if categoria:
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": categoria.serialize}),
+            200
+        )
+    else:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Categoria no encontrada"}}),
+            404
+        )
+
+@api_producto.route("/categoria/actualizar/<external_id>", methods=["POST"])
+def actualizar_categoria(external_id):
+    data = request.get_json()
+    try:
+        id = productoC.actualizar_categoria(external_id, data)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": {"tag": "Categoria Actualizada"}}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 500, "datos": {"error": str(e)}}),
+            500
+        )
+
+
+
+
 @api_producto.route("/producto/nombre/<producto_id>", methods=["GET"])
 def obtener_nombre_producto(producto_id):
     try:

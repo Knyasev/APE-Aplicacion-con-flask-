@@ -20,8 +20,8 @@ const Menu = ({ children }) => {
             </Link>
           </div>
           <div className="mt-4">
-            <Link href="/lote" className="text-white hover:text-gray-300 no-underline flex items-center">
-              <FaBox className="mr-2"/> Lote {/* Icono de caja para Lote */}
+            <Link href="/sucursal" className="text-white hover:text-gray-300 no-underline flex items-center">
+              <FaBox className="mr-2"/> Sucursal {/* Icono de caja para Sucursal */}
             </Link>
           </div>
           <div className="mt-4">

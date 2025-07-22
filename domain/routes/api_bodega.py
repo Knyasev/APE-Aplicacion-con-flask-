@@ -69,3 +69,18 @@ def activar_bodega(external_id):
             jsonify({"msg": "ERROR", "code": 404, "datos": {"error": str(e)}}),
             404
         )
+
+
+@api_bodega.route("/bodega/<external_id>", methods=["GET"])
+def get_bodega(external_id):
+    bodega = bodegaC.buscar_bodega(external_id)
+    if bodega:
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": bodega.serialize}),
+            200
+        )
+    else:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Bodega no encontrada"}}),
+            404
+        )

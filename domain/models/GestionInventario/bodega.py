@@ -22,7 +22,7 @@ class Bodega(db.Model):
             'ubicacion': self.ubicacion,
             'capacidad_maxima': str(self.capacidad_maxima) if self.capacidad_maxima else None,
             'estado': self.estado,
-            'bodeguero_id': self.bodeguero_id,
+            'usuario_id': self.usuario_id,
             'external_id': self.external_id
         }
         
@@ -31,5 +31,5 @@ class Bodega(db.Model):
         self.ubicacion = value.get('ubicacion')
         self.capacidad_maxima = value.get('capacidad_maxima', None)
         self.estado = value.get('estado', True)
-        self.bodeguero_id = value.get('bodeguero_id', None)
+        self.usuario_id = value.get('usuario_id', None)
         self.external_id = str(uuid.uuid4())

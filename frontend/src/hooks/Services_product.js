@@ -15,17 +15,6 @@ export async function  get_product(token){
     // TODO agarrar errores
 }
 
-export async function listar_categorias(token, categoria_id = null) {
-    let datos = null;
-    try {
-        datos = await GET(`/producto/categoria/${categoria_id}`, token);
-    } catch (error) {
-        console.log(error.response.data);
-        return {"code": 500}
-    }
-    return datos.data;
-}
-
 export async function create_product(data, token) {
     try {
         return await POST('producto/guardar', data, token);
@@ -35,18 +24,6 @@ export async function create_product(data, token) {
     }
 
 }
-export async function get_categoria(token) {
-    let datos = null;
-    try {
-        datos = await GET(`categoria`, token);
-    } catch (error) {
-        console.log(error.response.data);
-        return {"code": 500}
-    }
-    return datos.data;
-}
-
-
 export async function update_product(data, params, token) {
     let datos = null;
     try {
@@ -76,3 +53,61 @@ export async function get_product_external(params, token) {
     console.log("Datos recibidos:", datos?.data); // Verifica los datos recibidos
     return datos?.data || null; // Asegúrate de devolver un valor válido
 }
+
+export async function get_categoria(token) {
+    let datos = null;
+    try {
+        datos = await GET(`categoria`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500}
+    }
+    return datos.data;
+}
+
+export async function listar_categorias(token, categoria_id = null) {
+    let datos = null;
+    try {
+        datos = await GET(`/producto/categoria/${categoria_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500}
+    }
+    return datos.data;
+}
+
+export async function create_categoria(data, token) {
+    try {
+        return await POST('categoria/guardar', data, token);
+    } catch (error) {
+        console.error(error);
+        return null;
+    }
+}
+
+export async function update_categoria(data, params, token) {
+    let datos = null;
+    try {
+        datos = await POST(`categoria/actualizar/${params.external}`, data, token);
+        if (datos.code === 200) {
+        }
+    } catch (error) {
+        console.error(error);
+        return {"code": 500, "datos": error.response.data};
+    }
+    return datos.data;
+}
+
+export async function get_categoria_by_external(params, token) {
+    let datos = null;
+    try {
+        datos = await GET(`categoria/${params.external}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500}
+    }
+    return datos.data;
+}
+
+
+

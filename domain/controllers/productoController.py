@@ -61,6 +61,18 @@ class ProductoController():
         db.session.commit()
         return categoria.id
 
+    def buscar_categoria(self, external_id):
+        return CategoriaProducto.query.filter_by(external_id=external_id).first()
+
+    def actualizar_categoria(self, external_id, data):
+        categoria = self.buscar_categoria(external_id)
+        if categoria:
+            categoria.copy(data)
+            db.session.commit()
+            return categoria.id
+        else:
+            raise Exception("Categoria no encontrada")
+
     def obtener_categoria(self):
         return CategoriaProducto.query.all()
 
