@@ -5,6 +5,7 @@ from models.GestionInventario.itemInventario import ItemInventario
 from models.GestionInventario.stock import Stock
 from models.GestionInventario.bodega import Bodega
 from models.GestionInventario.Enums.TipoMovimiento import TipoMovimiento
+from models.GestionPedido.sucursal import Sucursal
 
 
 class Inventario(db.Model):
@@ -54,24 +55,31 @@ class Inventario(db.Model):
         db.session.commit()    
         
     @staticmethod
-    def registrar_salida(producto_id, cantidad, bodega_id):
+    def registrar_salida(producto_id, cantidad, sucursal_id,bodega_id=None):
         producto = Producto.query.get(producto_id)
         if not producto:
             raise Exception("Producto no encontrado")
-        
-        if not producto.stock or float(producto.stock.cantidad) < float(cantidad):  
+    
+        sucursal = Sucursal.query.get(sucursal_id)
+        if not sucursal:
+            raise Exception("Sucursal no encontrada")
+    
+        if not producto.stock or producto.stock.cantidad < cantidad:
             raise Exception("Stock insuficiente")
-        
+    
         # Actualizar stock
-        producto.stock.cantidad = float(producto.stock.cantidad) - float(cantidad) 
-
+        producto.stock.cantidad -= cantidad
+    
         # Registrar transacción
         item = ItemInventario(
-            tipo=TipoMovimiento.SALIDA, 
+            tipo=TipoMovimiento.SALIDA,
             cantidad=cantidad,
-            precio_unitario=float(producto.stock.pvp),  
+            precio_unitario=producto.stock.precio,
+            precio_total=cantidad * producto.stock.precio,
             producto_id=producto.id,
+            sucursal_id=sucursal_id,
             bodega_id=bodega_id
+
         )
         db.session.add(item)
         db.session.commit()
@@ -124,3 +132,4 @@ class Inventario(db.Model):
             "codigo": producto.codigo,
             "kardex": kardex
         }
+

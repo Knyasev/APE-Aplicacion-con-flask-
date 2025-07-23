@@ -14,6 +14,10 @@ class Sucursal(db.Model):
     admin_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))  # Clave foránea
     admin = db.relationship('Usuario', back_populates='sucursales')  # Relación
     pedidos = db.relationship('Pedido', back_populates='sucursal')  # Relación
+    bodega_id = db.Column(db.Integer, db.ForeignKey('bodega.id'))  # Relación con Bodega
+    bodega = db.relationship('Bodega', back_populates='sucursales')  # Relación inversa
+    movimientos = db.relationship('ItemInventario', back_populates='sucursal')
+
     @property
     def serialize(self):
         return {
@@ -23,7 +27,8 @@ class Sucursal(db.Model):
             'estado': self.estado,
             'admin_id': self.admin_id,
             'fecha_registro': self.fecha_registro.isoformat(),
-            'external_id': self.external_id
+            'external_id': self.external_id,
+            'bodega_id': self.bodega_id if self.bodega else None
         }
 
     def copy(self, value):
@@ -33,4 +38,5 @@ class Sucursal(db.Model):
         self.fecha_registro = datetime.utcnow()
         self.external_id = str(uuid.uuid4())
         self.admin_id = value.get('admin_id')
+        self.bodega_id = value.get('bodega_id')
         return self

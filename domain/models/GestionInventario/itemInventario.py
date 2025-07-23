@@ -19,8 +19,9 @@ class ItemInventario(db.Model):
     proveedor = db.Column(db.String(100))
     producto_id = db.Column(db.Integer, db.ForeignKey('producto.id'))
     producto = db.relationship('Producto', back_populates='movimientos')
-    
-    bodega_id = db.Column(db.Integer, db.ForeignKey('bodega.id'))
+    sucursal_id = db.Column(db.Integer, db.ForeignKey('sucursales.id'))  
+    sucursal = db.relationship('Sucursal', back_populates='movimientos')
+    bodega_id = db.Column(db.Integer, db.ForeignKey('bodega.id'),nullable=True)
     bodega = db.relationship('Bodega', back_populates='movimientos')
 
     def serialize(self):
@@ -36,5 +37,6 @@ class ItemInventario(db.Model):
             'bodega_id': self.bodega_id,
             'numero_comprobante': self.numero_comprobante,
             'tipo_comprobante': self.tipo_comprobante.name if self.tipo_comprobante else None,
-            'proveedor': self.proveedor
+            'proveedor': self.proveedor,
+            'sucursal_id': self.sucursal_id 
         }

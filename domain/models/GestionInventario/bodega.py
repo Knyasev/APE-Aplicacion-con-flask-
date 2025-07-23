@@ -12,7 +12,8 @@ class Bodega(db.Model):
     estado = db.Column(db.Boolean, default=True)
     usuario_id = db.Column(db.Integer, db.ForeignKey('usuario.id'))  # Clave foránea
     usuario = db.relationship('Usuario', back_populates='bodega')  # Relación inversa
-    
+    sucursales = db.relationship('Sucursal', back_populates='bodega')  # Relación inversa
+
     movimientos = db.relationship('ItemInventario', back_populates='bodega')
     @property
     def serialize(self):
@@ -23,7 +24,7 @@ class Bodega(db.Model):
             'capacidad_maxima': str(self.capacidad_maxima) if self.capacidad_maxima else None,
             'estado': self.estado,
             'usuario_id': self.usuario_id,
-            'external_id': self.external_id
+            'external_id': self.external_id,
         }
         
     def copy(self, value):

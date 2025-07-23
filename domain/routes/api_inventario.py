@@ -32,7 +32,8 @@ def registrar_salida():
         Inventario.registrar_salida(
             producto_id=data['producto_id'],
             cantidad=data['cantidad'],
-            bodega_id=data['bodega_id']
+            sucursal_id=data['sucursal_id'],
+            bodega_id=data.get('bodega_id', None)  # bodega_id is optional
         )
         return jsonify({"msg": "Salida registrada correctamente", "code": 200}), 200
     except Exception as e:
@@ -119,3 +120,5 @@ def listar_tipos_comprobante():
         )
     except Exception as e:
         return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500
+
+

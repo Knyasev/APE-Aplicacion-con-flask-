@@ -7,6 +7,12 @@ class BodegaController:
     def listar_bodegas(self):
         return Bodega.query.all()
 
+    def obtener_bodega_por_id(self, bodega_id):
+        bodega = Bodega.query.get(bodega_id)
+        if not bodega:
+            raise Error("Bodega no encontrada", 404)
+        return bodega
+
     def registrar_bodega(self, data):
         bodega = Bodega()
         bodega.nombre = data.get("nombre")
@@ -49,7 +55,8 @@ class BodegaController:
             db.session.add(bodega)
             db.session.commit()
             return bodega
-            
+
+
             
             
         

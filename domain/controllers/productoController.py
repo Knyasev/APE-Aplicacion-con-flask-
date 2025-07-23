@@ -1,6 +1,7 @@
 from controllers.utils.observer import Observer
 from models.GestionInventario.producto import Producto
 from models.GestionInventario.categoriaproducto import CategoriaProducto
+from models.GestionInventario.stock import Stock
 import uuid
 from app import db
 class ProductoController():
@@ -88,3 +89,10 @@ class ProductoController():
             raise Exception("Producto no encontrado")
         return producto.nombre
 
+    def stock_producto(self, producto_id):
+        stock = Stock.query.filter_by(producto_id=producto_id).first()
+        if not stock:
+            raise Exception("Stock no encontrado")
+        if stock.cantidad <= 0:
+            return None
+        return stock.serialize()

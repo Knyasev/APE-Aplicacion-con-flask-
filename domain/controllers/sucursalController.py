@@ -14,6 +14,7 @@ class SucursalController:
         sucursal.telefono = data.get("telefono")
         sucursal.estado = data.get("estado", True)  
         sucursal.admin_id = data.get("admin_id")
+        sucursal.bodega_id = data.get("bodega_id")
         sucursal.fecha_registro = datetime.utcnow()
         sucursal.external_id = uuid.uuid4()
         db.session.add(sucursal)
@@ -62,4 +63,10 @@ class SucursalController:
         sucursal = Sucursal.query.get(sucursal_id)
         if not sucursal:
             raise Error("Sucursal no encontrada", 404)
+        return sucursal
+
+    def get_sucursal_by_bodega_id(self, bodega_id):
+        sucursal = Sucursal.query.filter_by(bodega_id=bodega_id).first()
+        if not sucursal:
+            raise Error("Sucursal no encontrada para la bodega especificada", 404)
         return sucursal

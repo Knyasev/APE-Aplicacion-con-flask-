@@ -1,5 +1,6 @@
 from models.GestionInventario.itemInventario import ItemInventario
 from models.GestionInventario.producto import Producto
+from models.GestionInventario.Enums.TipoDocumento import TipoDocumento
 from controllers.utils.errors import Error
 import uuid
 from app import db
@@ -37,3 +38,8 @@ class InventarioController:
         if not producto.stock or producto.stock.cantidad <= 0:
             return None
         return producto.stock.serialize()
+
+
+    def listar_tipos_comprobante(self):
+        tipos = [tipo.value for tipo in TipoDocumento]
+        return tipos

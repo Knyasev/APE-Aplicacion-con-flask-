@@ -8,20 +8,25 @@ import { useRouter } from 'next/navigation';
 import { useState, useEffect } from 'react';
 import { get_sucursal_by_external, update_sucursal } from '@/hooks/Services_sucursal';
 import { get_person } from '@/hooks/Services_person';
+import { get_bodega } from '@/hooks/Services_bodega'; // Importamos el servicio de bodegas
 import Menu from "@/app/components/menu";
 
 export default function EditSucursal({ params }) {
     const router = useRouter();
     const [usuario, setUsuario] = useState(null);
     const [sucursal, setSucursal] = useState(null);
+    const [bodegas, setBodegas] = useState([]); // Estado para almacenar las bodegas
+    const [loadingBodegas, setLoadingBodegas] = useState(true); // Estado de carga
     const token = Cookies.get('token');
     const external_id = Cookies.get('external_id');
     const sucursalExternalId = params.external;
 
-    // Schema de validación para sucursal
+    // Schema de validación para sucursal (actualizado con bodega_id)
     const validationSchema = Yup.object().shape({
         nombre: Yup.string().required('El nombre es requerido'),
         ubicacion: Yup.string().required('La ubicación es requerida'),
+        telefono: Yup.string().required('El teléfono es requerido'),
+        bodega_id: Yup.number().required('Debe seleccionar una bodega'),
         estado: Yup.boolean()
     });
 
@@ -34,20 +39,36 @@ export default function EditSucursal({ params }) {
             get_person(token, external_id).then((info) => {
                 if (info.code == '200') {
                     setUsuario(info.datos);
-                    console.log(info.datos);
                 }
             });
         }
+
+        // Cargar las bodegas disponibles
+        const fetchBodegas = async () => {
+            try {
+                const response = await get_bodega(token);
+                if (response && response.datos) {
+                    setBodegas(response.datos);
+                }
+            } catch (error) {
+                console.error("Error al cargar bodegas:", error);
+            } finally {
+                setLoadingBodegas(false);
+            }
+        };
+
+        fetchBodegas();
             
         // Cargar datos de la sucursal a editar
         if (sucursalExternalId) {
             get_sucursal_by_external({ external: sucursalExternalId}, token ).then((info) => {
                 if (info.code == '200') {
                     setSucursal(info.datos);
-                    console.log(info.datos);
                     // Establecer valores en el formulario
                     setValue('nombre', info.datos.nombre);
                     setValue('ubicacion', info.datos.ubicacion);
+                    setValue('telefono', info.datos.telefono || '');
+                    setValue('bodega_id', info.datos.bodega_id || '');
                     setValue('estado', info.datos.estado);
                 }
             });
@@ -58,6 +79,8 @@ export default function EditSucursal({ params }) {
         const sucursalData = {
             nombre: data.nombre,
             ubicacion: data.ubicacion,
+            telefono: data.telefono,
+            bodega_id: data.bodega_id,
             estado: data.estado,
             admin_id: usuario?.id
         };
@@ -116,6 +139,36 @@ export default function EditSucursal({ params }) {
                             ></textarea>
                             {errors.ubicacion && <div className="text-danger">{errors.ubicacion?.message}</div>}
                         </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Teléfono:</label>
+                            <input 
+                                type="text" 
+                                {...register('telefono')} 
+                                name="telefono" 
+                                placeholder="Teléfono de la sucursal" 
+                                className="form-control"
+                            />
+                            {errors.telefono && <div className="text-danger">{errors.telefono?.message}</div>}
+                        </div>
+
+                        <div className="mb-3">
+                            <label className="form-label">Bodega:</label>
+                            <select 
+                                {...register('bodega_id')} 
+                                name="bodega_id" 
+                                className="form-control"
+                                disabled={loadingBodegas}
+                            >
+                                <option value="">Seleccione una bodega</option>
+                                {bodegas.map((bodega) => (
+                                    <option key={bodega.id} value={bodega.id}>
+                                        {bodega.nombre} - {bodega.ubicacion}
+                                    </option>
+                                ))}
+                            </select>
+                            {errors.bodega_id && <div className="text-danger">{errors.bodega_id?.message}</div>}
+                        </div>
                         
                         <div className="mb-3 form-check">
                             <input 
@@ -126,8 +179,6 @@ export default function EditSucursal({ params }) {
                             />
                             <label className="form-check-label">Activo</label>
                         </div>
-                        
-                       
                         
                         <button type="submit" className="w-100 btn btn-lg btn-primary">Actualizar Sucursal</button>
                     </form>

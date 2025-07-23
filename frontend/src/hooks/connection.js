@@ -18,6 +18,8 @@ export const POST = async (resource, data, token = "NONE") => {
             }
         }
     }
+    console.log("Headers: ", headers);
+    console.log("Data: ", data);
     return await axios.post(URL + resource, data, headers)
 }
 
