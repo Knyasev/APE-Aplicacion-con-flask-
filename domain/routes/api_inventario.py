@@ -7,7 +7,7 @@ inventarioC = InventarioController()
 
 
 @api_inventario.route('/inventario/entrada', methods=['POST'])
-@token_required(roles_permitidos=["BODEGUERO"])
+@token_required()
 def registrar_entrada():
     data = request.get_json()
     try:
@@ -108,3 +108,14 @@ def listar_stock_producto(producto_id):
     except Exception as e:
         return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500
         
+
+@api_inventario.route('/inventario/tipos_documento', methods=['GET'])
+def listar_tipos_comprobante():
+    try:
+        tipos_comprobante = inventarioC.listar_tipos_comprobante()
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": tipos_comprobante}),
+            200
+        )
+    except Exception as e:
+        return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500

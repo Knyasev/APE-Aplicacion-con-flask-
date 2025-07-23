@@ -68,3 +68,25 @@ export async function get_bodega_by_external(params, token) {
     }
     return datos.data;
 }
+
+export async function get_bodega_by_id(bodega_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`bodega/nombre/${bodega_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+}
+
+export async function get_stock_by_bodega(bodega_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`bodega/stock/${bodega_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+}

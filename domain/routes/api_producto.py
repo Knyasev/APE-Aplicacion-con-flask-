@@ -133,3 +133,15 @@ def obtener_nombre_producto(producto_id):
         return jsonify({"msg": "OK", "code": 200, "nombre": nombre_producto}), 200
     except Exception as e:
         return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500
+
+
+@api_producto.route("/producto/stock/<producto_id>", methods=["GET"])
+def stock_producto(producto_id):
+    try:
+        stock = productoC.stock_producto(producto_id)
+        if stock:
+            return jsonify({"msg": "OK", "code": 200, "datos": stock}), 200
+        else:
+            return jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Stock no disponible"}}), 404
+    except Exception as e:
+        return jsonify({"msg": "ERROR", "code": 500, "datos": {"error": str(e)}}), 500

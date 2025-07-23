@@ -33,6 +33,8 @@ class ItemInventario(db.Model):
             'precio_unitario': str(self.precio_unitario),
             'precio_total': str(self.precio_total),
             'producto_id': self.producto_id,
-            'bodega_id': self.bodega_id
-        } 
-    
+            'bodega_id': self.bodega_id,
+            'numero_comprobante': self.numero_comprobante,
+            'tipo_comprobante': self.tipo_comprobante.name if self.tipo_comprobante else None,
+            'proveedor': self.proveedor
+        }

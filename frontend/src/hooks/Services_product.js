@@ -15,6 +15,17 @@ export async function  get_product(token){
     // TODO agarrar errores
 }
 
+export async function get_product_by_id(id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`/producto/nombre/${id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+
+}
 export async function create_product(data, token) {
     try {
         return await POST('producto/guardar', data, token);
@@ -102,6 +113,18 @@ export async function get_categoria_by_external(params, token) {
     let datos = null;
     try {
         datos = await GET(`categoria/${params.external}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500}
+    }
+    return datos.data;
+}
+
+
+export async function get_stock_by_producto(producto_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`producto/stock/${producto_id}`, token);
     } catch (error) {
         console.log(error.response.data);
         return {"code": 500}
