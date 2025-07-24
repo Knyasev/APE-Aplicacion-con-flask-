@@ -21,7 +21,7 @@ export default function Session() {
     const token = Cookies.get('token');
     if (token) {
       router.replace('/loading'); 
-      router.replace('/lote');
+      router.replace('/producto'); // Cambié de '/lote' a '/producto' para que coincida con el contexto del código
     }
   }, []);   
 

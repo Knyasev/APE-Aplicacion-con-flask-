@@ -202,7 +202,6 @@ const handleBodegaChange = async (e) => {
             <main className="container text-center mt-5" style={{paddingLeft:"300px"}}>
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '15px' }}>
                     <Link href="/inventario/entry" className="btn btn-info">Registrar Entrada</Link>
-                    <Link href="/inventario/exit" className="btn btn-info">Registrar Salida</Link>
                 </div>
                 <div className="container-fluid">
                     <table className="table table-hover">
@@ -240,7 +239,6 @@ const handleBodegaChange = async (e) => {
                                             </td>
                                             <td>
                                                 <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '5px' }}>
-                                                    <Link href={`/producto/edit/${producto.external_id}`} className="btn btn-primary">Editar</Link>
                                                     <button 
                                                         onClick={() => verMovimientos(producto.id)} 
                                                         className="btn btn-secondary"

@@ -70,3 +70,10 @@ class SucursalController:
         if not sucursal:
             raise Error("Sucursal no encontrada para la bodega especificada", 404)
         return sucursal
+
+    def get_sucursal_by_usuario(self, admin_id):
+        sucursal = Sucursal.query.filter_by(admin_id=admin_id).first()
+        if not sucursal:
+            raise Error("Sucursal no encontrada para el usuario especificado", 404)
+        return sucursal
+    

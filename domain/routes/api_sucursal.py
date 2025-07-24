@@ -116,3 +116,17 @@ def get_sucursal_by_bodega_id(bodega_id):
             jsonify({"msg": "ERROR", "code": 404, "datos": {"error": str(e)}}),
             404
         )
+
+@api_sucursal.route("/sucursal/usuario/<int:usuario_id>", methods=["GET"])
+def get_sucursal_by_usuario(usuario_id):
+    try:
+        sucursal = sucursalC.get_sucursal_by_usuario(usuario_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": sucursal.serialize}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": str(e)}}),
+            404
+        )

@@ -12,6 +12,7 @@ class Pedido(db.Model):
     detalles = db.relationship('DetallePedido', backref='pedido', lazy=True)
     sucursal_id = db.Column(db.Integer, db.ForeignKey('sucursales.id'))  
     sucursal = db.relationship('Sucursal', back_populates='pedidos')  
+    @property
     def serialize(self):
         return {
             'id': self.id,
