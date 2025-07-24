@@ -75,7 +75,7 @@ def obtener_pedido(external_id):
     try:
         pedido = pedidoC.buscar_external(external_id)
         return make_response(
-            jsonify({"msg": "OK", "code": 200, "datos": pedido.serialize()}),
+            jsonify({"msg": "OK", "code": 200, "datos": pedido.serialize}),
             200
         )
     except Exception as e:
@@ -91,6 +91,35 @@ def obtener_detalle_pedido(pedido_id):
         detalles = pedidoC.get_detalles_pedido(pedido_id)
         return make_response(
             jsonify({"msg": "OK", "code": 200, "datos": detalles}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 400, "datos": {"error": str(e)}}),
+            400
+        )
+
+
+@api_pedido.route("/pedido/cancelar/<external_id>", methods=["GET"])
+def cancelar_pedido(external_id):
+    try:
+        pedido_id = pedidoC.cancelar_pedido(external_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": {"tag": "Pedido Cancelado"}}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 400, "datos": {"error": str(e)}}),
+            400
+        )
+
+@api_pedido.route("/pedido/entregado/<external_id>", methods=["GET"])
+def cambiar_estado_entregado(external_id):
+    try:
+        pedido_id = pedidoC.cambiar_estado_entregado(external_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": {"tag": "Pedido Entregado"}}),
             200
         )
     except Exception as e:

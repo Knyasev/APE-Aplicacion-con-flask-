@@ -1,6 +1,7 @@
 from models.GestionPedido.pedido import Pedido
 from models.GestionPedido.detallePedido import DetallePedido
 from controllers.utils.errors import Error
+from models.GestionPedido.Enums.EstadoPedido import EstadoPedido
 import uuid
 from app import db
 class PedidoController:
@@ -19,6 +20,9 @@ class PedidoController:
         pedido.estado = data.get('estado')
         pedido.usuario_id = data.get('usuario_id')
         pedido.sucursal_id = data.get('sucursal_id')
+        pedido.precio_total=data.get('precio_total')
+        pedido.metodo_de_pago = data.get('metodo_de_pago')
+        # Generar un UUID único para el pedido
         pedido.external_id = str(uuid.uuid4())
         db.session.add(pedido)
         db.session.commit()
@@ -27,19 +31,19 @@ class PedidoController:
         detalles = data.get('detalles', [])
         for detalle_data in detalles:
             detalle = DetallePedido()
-            detalle.cantidad_solicitada = detalle_data.get('cantidad_solicitada')
-            detalle.cantidad_entregada = detalle_data.get('cantidad_entregada', 0)
+            detalle.cantidad = detalle_data.get('cantidad')
             detalle.pedido_id = pedido.id
             detalle.producto_id = detalle_data.get('producto_id')
+            detalle.subtotal = detalle_data.get('subtotal')
             detalle.external_id = str(uuid.uuid4())
             db.session.add(detalle)
-    
         db.session.commit()
         return pedido.id
 
 
-    def modificar_pedido(self, pedido_id, data):
-        pedido = Pedido.query.get(pedido_id)
+
+    def modificar_pedido(self, external_id, data):
+        pedido = self.buscar_external(external_id)
         if not pedido:
             raise Error("Pedido no encontrado")
         
@@ -48,27 +52,26 @@ class PedidoController:
         pedido.estado = data.get('estado', pedido.estado)
         pedido.usuario_id = data.get('usuario_id', pedido.usuario_id)
         pedido.sucursal_id = data.get('sucursal_id', pedido.sucursal_id)
+        pedido.precio_total = data.get('precio_total', pedido.precio_total)
+        pedido.metodo_de_pago = data.get('metodo_de_pago', pedido.metodo_de_pago)
         
         db.session.commit()
         detalles = data.get('detalles', [])
         for detalle_data in detalles:
-            detalle = DetallePedido.query.filter_by(pedido_id=pedido_id, producto_id=detalle_data.get('producto_id')).first()
+            detalle = DetallePedido.query.filter_by(pedido_id=pedido.id, producto_id=detalle_data.get('producto_id')).first()
             if detalle:
-                detalle.cantidad_solicitada = detalle_data.get('cantidad_solicitada', detalle.cantidad_solicitada)
-                detalle.cantidad_entregada = detalle_data.get('cantidad_entregada', detalle.cantidad_entregada)
+                detalle.cantidad = detalle_data.get('cantidad', detalle.cantidad)
+                detalle.subtotal = detalle_data.get('subtotal', detalle.subtotal)
             else:
-                # Si el detalle no existe, crearlo
                 nuevo_detalle = DetallePedido()
-                nuevo_detalle.cantidad_solicitada = detalle_data.get('cantidad_solicitada')
-                nuevo_detalle.cantidad_entregada = detalle_data.get('cantidad_entregada', 0)
+                nuevo_detalle.cantidad = detalle_data.get('cantidad', 0)
                 nuevo_detalle.pedido_id = pedido.id
                 nuevo_detalle.producto_id = detalle_data.get('producto_id')
+                nuevo_detalle.subtotal = detalle_data.get('subtotal', 0)
                 nuevo_detalle.external_id = str(uuid.uuid4())
                 db.session.add(nuevo_detalle)
-
         db.session.commit()
         return pedido.id
-
 
     def obtener_pedido(self, pedido_id):
         pedido = Pedido.query.get(pedido_id)
@@ -109,5 +112,25 @@ class PedidoController:
         
         detalles = DetallePedido.query.filter_by(pedido_id=pedido_id).all()
         return [detalle.serialize() for detalle in detalles]
+
+
+    def cancelar_pedido(self, external_id):
+        pedido = self.buscar_external(external_id)
+        if not pedido:
+            raise Error("Pedido no encontrado")
+        # Cambiar el estado del pedido a CANCELADO
+        pedido.estado = EstadoPedido.CANCELADO
+        db.session.commit()
+        return pedido.id
+
+    def cambiar_estado_entregado(self, external_id):
+        pedido = self.buscar_external(external_id)
+        if not pedido:
+            raise Error("Pedido no encontrado")
+        # Cambiar el estado del pedido a ENTREGADO
+        pedido.estado = EstadoPedido.ENTREGADO
+        db.session.commit()
+        return pedido.id
+
 
     

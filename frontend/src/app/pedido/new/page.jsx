@@ -4,7 +4,7 @@ import Cookies from 'js-cookie';
 import { create_pedido } from "@/hooks/Services_pedido";
 import { get_person } from "@/hooks/Services_person";
 import { get_sucursal_by_usuario } from "@/hooks/Services_sucursal";
-import { get_product } from "@/hooks/Services_product";
+import { get_product, get_stock_by_producto } from "@/hooks/Services_product";
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as Yup from 'yup';
@@ -18,6 +18,8 @@ export default function NewPedido() {
     const [detalles, setDetalles] = useState([]);
     const [usuario, setUsuario] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [metodoPago, setMetodoPago] = useState('Efectivo');
+    const [precioTotal, setPrecioTotal] = useState(0);
     const token = Cookies.get('token');
     const external_id = Cookies.get('external_id');
 
@@ -36,7 +38,6 @@ export default function NewPedido() {
                 // 2. Cargar sucursales del usuario
                 const sucursalesInfo = await get_sucursal_by_usuario(userInfo.datos.id, token);
                 if (sucursalesInfo.code === 200) {
-                    // Asegurar que siempre sea un array
                     const sucursalesData = Array.isArray(sucursalesInfo.datos) 
                         ? sucursalesInfo.datos 
                         : [sucursalesInfo.datos];
@@ -65,6 +66,12 @@ export default function NewPedido() {
         }
     }, [token, external_id]);
 
+    // Calcular precio total cuando cambian los detalles
+    useEffect(() => {
+        const total = detalles.reduce((sum, detalle) => sum + (detalle.subtotal || 0), 0);
+        setPrecioTotal(total);
+    }, [detalles]);
+
     const validationSchema = Yup.object().shape({
         fecha: Yup.date()
             .required('La fecha es requerida')
@@ -75,17 +82,21 @@ export default function NewPedido() {
         detalles: Yup.array()
             .of(
                 Yup.object().shape({
-                    producto_id: Yup.number().required(),
-                    cantidad_solicitada: Yup.number().min(1).required()
+                    producto_id: Yup.number().required('Producto es requerido'),
+                    cantidad_solicitada: Yup.number()
+                        .min(1, 'La cantidad debe ser al menos 1')
+                        .required('Cantidad es requerida')
                 })
             )
             .min(1, 'Debe agregar al menos un producto')
+            .required('Debe agregar al menos un producto')
     });
 
     const { register, handleSubmit, formState: { errors }, setValue, watch } = useForm({
         resolver: yupResolver(validationSchema),
         defaultValues: {
             fecha: new Date().toISOString().slice(0, 16),
+            sucursal_id: '',
             detalles: []
         }
     });
@@ -95,7 +106,7 @@ export default function NewPedido() {
         cantidad_solicitada: 1
     });
 
-    const agregarDetalle = () => {
+    const agregarDetalle = async () => {
         if (!nuevoDetalle.producto_id) {
             swal("Error", "Seleccione un producto", "error");
             return;
@@ -110,45 +121,76 @@ export default function NewPedido() {
             return;
         }
 
-        setDetalles(prevDetalles => {
-            // Buscar si el producto ya existe en los detalles
-            const detalleExistenteIndex = prevDetalles.findIndex(d => d.producto_id === productoId);
-            
-            if (detalleExistenteIndex >= 0) {
-                // Si existe, actualizar la cantidad
-                const nuevosDetalles = [...prevDetalles];
-                nuevosDetalles[detalleExistenteIndex] = {
-                    ...nuevosDetalles[detalleExistenteIndex],
-                    cantidad_solicitada: nuevosDetalles[detalleExistenteIndex].cantidad_solicitada + cantidad
-                };
-                return nuevosDetalles;
-            } else {
-                // Si no existe, agregar nuevo detalle
-                return [
-                    ...prevDetalles,
-                    {
-                        producto_id: productoId,
-                        producto_nombre: productoSeleccionado.nombre,
-                        cantidad_solicitada: cantidad,
-                        cantidad_entregada: 0
-                    }
-                ];
+        try {
+            // Obtener información del stock para el producto (incluye PVP)
+            const stockInfo = await get_stock_by_producto(productoId, token);
+            if (stockInfo.code !== 200) {
+                throw new Error("Error al obtener información del producto");
             }
-        });
 
-        // Resetear el formulario de nuevo detalle
-        setNuevoDetalle({
-            producto_id: '',
-            cantidad_solicitada: 1
-        });
+            const pvp = parseFloat(stockInfo.datos.pvp);
+            const subtotal = pvp * cantidad;
 
-        // Actualizar el valor del formulario react-hook-form
-        setValue('detalles', [...detalles], { shouldValidate: true });
+            setDetalles(prevDetalles => {
+                // Buscar si el producto ya existe en los detalles
+                const detalleExistenteIndex = prevDetalles.findIndex(d => d.producto_id === productoId);
+                
+                let nuevosDetalles;
+                
+                if (detalleExistenteIndex >= 0) {
+                    // Si existe, actualizar la cantidad y subtotal
+                    nuevosDetalles = [...prevDetalles];
+                    nuevosDetalles[detalleExistenteIndex] = {
+                        ...nuevosDetalles[detalleExistenteIndex],
+                        cantidad_solicitada: nuevosDetalles[detalleExistenteIndex].cantidad_solicitada + cantidad,
+                        subtotal: nuevosDetalles[detalleExistenteIndex].subtotal + subtotal
+                    };
+                } else {
+                    // Si no existe, agregar nuevo detalle
+                    nuevosDetalles = [
+                        ...prevDetalles,
+                        {
+                            producto_id: productoId,
+                            producto_nombre: productoSeleccionado.nombre,
+                            cantidad_solicitada: cantidad,
+                            pvp: pvp,
+                            subtotal: subtotal
+                        }
+                    ];
+                }
+                
+                // Actualizar el valor del formulario react-hook-form
+                setValue('detalles', nuevosDetalles.map(d => ({
+                    producto_id: d.producto_id,
+                    cantidad_solicitada: d.cantidad_solicitada
+                })), { shouldValidate: true });
+                
+                return nuevosDetalles;
+            });
+
+            // Resetear el formulario de nuevo detalle
+            setNuevoDetalle({
+                producto_id: '',
+                cantidad_solicitada: 1
+            });
+
+        } catch (error) {
+            swal("Error", error.message, "error");
+        }
     };
 
     const eliminarDetalle = (index) => {
-        const nuevosDetalles = detalles.filter((_, i) => i !== index);
-        setDetalles(nuevosDetalles);
+        setDetalles(prevDetalles => {
+            const nuevosDetalles = prevDetalles.filter((_, i) => i !== index);
+            
+            // Actualizar el valor del formulario react-hook-form
+            setValue('detalles', nuevosDetalles.map(d => ({
+                producto_id: d.producto_id,
+                cantidad_solicitada: d.cantidad_solicitada
+            })), { shouldValidate: true });
+            
+            return nuevosDetalles;
+        });
     };
 
     const sendInfo = async (data) => {
@@ -156,32 +198,33 @@ export default function NewPedido() {
             swal("Error", "Datos incompletos", "error");
             return;
         }
-let fechaFormateada;
+
+        let fechaFormateada;
     
-    if (data.fecha instanceof Date) {
-        // Si es un objeto Date
-        const año = data.fecha.getFullYear();
-        const mes = String(data.fecha.getMonth() + 1).padStart(2, '0');
-        const dia = String(data.fecha.getDate()).padStart(2, '0');
-        fechaFormateada = `${año}-${mes}-${dia}`;
-    } else if (typeof data.fecha === 'string') {
-        // Si es un string ISO (con 'T')
-        fechaFormateada = data.fecha.split('T')[0];
-    } else {
-        // Formato desconocido - usar fecha actual como fallback
-        const hoy = new Date();
-        fechaFormateada = hoy.toISOString().split('T')[0];
-        swal("Advertencia", "Formato de fecha no reconocido, usando fecha actual", "warning");
-    }
+        if (data.fecha instanceof Date) {
+            const año = data.fecha.getFullYear();
+            const mes = String(data.fecha.getMonth() + 1).padStart(2, '0');
+            const dia = String(data.fecha.getDate()).padStart(2, '0');
+            fechaFormateada = `${año}-${mes}-${dia}`;
+        } else if (typeof data.fecha === 'string') {
+            fechaFormateada = data.fecha.split('T')[0];
+        } else {
+            const hoy = new Date();
+            fechaFormateada = hoy.toISOString().split('T')[0];
+            swal("Advertencia", "Formato de fecha no reconocido, usando fecha actual", "warning");
+        }
+
         const pedidoData = {
             fecha: fechaFormateada,
-            estado: "CREADO", // Estado por defecto según tu estructura
+            estado: "CREADO",
             usuario_id: usuario.id,
             sucursal_id: parseInt(data.sucursal_id),
+            metodo_de_pago: metodoPago,
+            precio_total: precioTotal,
             detalles: detalles.map(d => ({
                 producto_id: d.producto_id,
-                cantidad_solicitada: d.cantidad_solicitada,
-                cantidad_entregada: 0 // Valor por defecto según tu estructura
+                cantidad: d.cantidad_solicitada,
+                subtotal: d.subtotal
             }))
         };
 
@@ -260,7 +303,20 @@ let fechaFormateada;
                         <div className="invalid-feedback">{errors.fecha.message}</div>
                     )}
                 </div>
-                
+
+                <div className="mb-3">
+                    <label className="form-label">Método de Pago:</label>
+                    <select
+                        className="form-control"
+                        value={metodoPago}
+                        onChange={(e) => setMetodoPago(e.target.value)}
+                    >
+                        <option value="Efectivo">Efectivo</option>
+                        <option value="Tarjeta">DEUNA</option>
+                        <option value="PayPal">Ahorita</option>
+                    </select>
+                </div>
+
                 <div className="mb-3">
                     <h4>Detalles del Pedido</h4>
                     <div className="row g-2 mb-3">
@@ -285,9 +341,9 @@ let fechaFormateada;
                                 min="1"
                                 value={nuevoDetalle.cantidad_solicitada}
                                 onChange={(e) => setNuevoDetalle({
-    ...nuevoDetalle, 
-    cantidad_solicitada: Math.max(1, parseInt(e.target.value) || 1) // Se agregó el paréntesis que faltaba
-})}
+                                    ...nuevoDetalle, 
+                                    cantidad_solicitada: Math.max(1, parseInt(e.target.value) || 1)
+                                })}
                             />
                         </div>
                         <div className="col-md-3">
@@ -304,32 +360,41 @@ let fechaFormateada;
                     
                     <div className="mt-3">
                         {detalles.length > 0 ? (
-                            <table className="table table-bordered">
-                                <thead className="table-light">
-                                    <tr>
-                                        <th>Producto</th>
-                                        <th>Cantidad Solicitada</th>
-                                        <th>Acción</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {detalles.map((detalle, index) => (
-                                        <tr key={index}>
-                                            <td>{detalle.producto_nombre}</td>
-                                            <td>{detalle.cantidad_solicitada}</td>
-                                            <td>
-                                                <button 
-                                                    type="button" 
-                                                    className="btn btn-danger btn-sm"
-                                                    onClick={() => eliminarDetalle(index)}
-                                                >
-                                                    Eliminar
-                                                </button>
-                                            </td>
+                            <>
+                                <table className="table table-bordered">
+                                    <thead className="table-light">
+                                        <tr>
+                                            <th>Producto</th>
+                                            <th>Precio Unitario</th>
+                                            <th>Cantidad</th>
+                                            <th>Subtotal</th>
+                                            <th>Acción</th>
                                         </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                                    </thead>
+                                    <tbody>
+                                        {detalles.map((detalle, index) => (
+                                            <tr key={index}>
+                                                <td>{detalle.producto_nombre}</td>
+                                                <td>${detalle.pvp?.toFixed(2) || '0.00'}</td>
+                                                <td>{detalle.cantidad_solicitada}</td>
+                                                <td>${detalle.subtotal?.toFixed(2) || '0.00'}</td>
+                                                <td>
+                                                    <button 
+                                                        type="button" 
+                                                        className="btn btn-danger btn-sm"
+                                                        onClick={() => eliminarDetalle(index)}
+                                                    >
+                                                        Eliminar
+                                                    </button>
+                                                </td>
+                                            </tr>
+                                        ))}
+                                    </tbody>
+                                </table>
+                                <div className="text-end">
+                                    <h5>Total: ${precioTotal.toFixed(2)}</h5>
+                                </div>
+                            </>
                         ) : (
                             <div className="alert alert-warning">
                                 No hay productos agregados al pedido

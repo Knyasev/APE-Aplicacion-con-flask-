@@ -20,16 +20,29 @@ const Menu = ({ children }) => {
             </Link>
           </div>
           <div className="mt-4">
+            <Link href="/bodega" className="text-white hover:text-gray-300 no-underline flex items-center">
+              <FaProductHunt className="mr-2"/> Bodega {/* Icono de producto */}
+            </Link>
+          </div>
+          <div className="mt-4">
             <Link href="/sucursal" className="text-white hover:text-gray-300 no-underline flex items-center">
               <FaBox className="mr-2"/> Sucursal {/* Icono de caja para Sucursal */}
             </Link>
           </div>
+          
+          
+          
+
           <div className="mt-4">
+            <Link href="/categoriaProducto" className="text-white hover:text-gray-300 no-underline flex items-center">
+              <FaProductHunt className="mr-2"/> Categoria Producto {/* Icono de producto */}
+            </Link>
+          </div>
+<div className="mt-4">
             <Link href="/producto" className="text-white hover:text-gray-300 no-underline flex items-center">
               <FaProductHunt className="mr-2"/> Producto {/* Icono de producto */}
             </Link>
           </div>
-          
           <div className="mt-4" style={{marginTop: "450px", borderRadius: "2px", textDecoration: "none"}}>
             <Link href="/session" className="text-white hover:text-gray-300 no-underline flex items-center" onClick={(e) => close(e)}>
               <FaDoorOpen className="mr-2"/> Cerrar sesión {/* Icono de puerta abierta para Cerrar sesión */}

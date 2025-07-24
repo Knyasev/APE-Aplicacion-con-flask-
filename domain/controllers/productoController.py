@@ -26,6 +26,12 @@ class ProductoController():
     def buscar_producto(self,external_id):
         return Producto.query.filter_by(external_id=external_id).first()
 
+    def get_producto_by_id(self, producto_id):
+        producto = Producto.query.get(producto_id)
+        if not producto:
+            raise Exception("Producto no encontrado")
+        return producto
+
 
     def registrar_salida_producto(self, data):
         producto = Producto()
