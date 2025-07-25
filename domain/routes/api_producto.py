@@ -145,3 +145,15 @@ def stock_producto(producto_id):
             return jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Stock no disponible"}}), 404
     except Exception as e:
         return jsonify({"msg": "ERROR", "code": 500, "datos": {"error": str(e)}}), 500
+
+
+@api_producto.route("/producto/id/<producto_id>", methods=["GET"])
+def obtener_producto(producto_id):
+    try:
+        producto = productoC.get_producto_by_id(producto_id)
+        if producto:
+            return jsonify({"msg": "OK", "code": 200, "datos": producto.serialize}), 200
+        else:
+            return jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Producto no encontrado"}}), 404
+    except Exception as e:
+        return jsonify({"msg": "ERROR", "code": 500, "datos": {"error": str(e)}}), 500

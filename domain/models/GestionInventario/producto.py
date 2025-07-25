@@ -28,7 +28,8 @@ class Producto(db.Model):
             'estado': self.estado.value,
             'stock_actual': str(self.stock_actual) if self.stock_actual else None,
             'categoria_id': self.categoria_id,
-            'external_id': self.external_id
+            'external_id': self.external_id,
+            'admin_id': self.admin_id
         }
     def copy(self, value):
         self.codigo = value.get('codigo')
@@ -38,6 +39,7 @@ class Producto(db.Model):
         self.stock_actual = value.get('stock_actual', 0)
         self.categoria_id = value.get('categoria_id', None)
         self.bodega_id = value.get('bodega_id', None)
-        self.external_id = str(uuid.uuid4())
+        self.external_id = str(uuid.uuid4()),
+        self.admin_id = value.get('admin_id')
         
         return self

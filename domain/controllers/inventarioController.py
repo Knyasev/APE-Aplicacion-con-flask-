@@ -43,3 +43,11 @@ class InventarioController:
     def listar_tipos_comprobante(self):
         tipos = [tipo.value for tipo in TipoDocumento]
         return tipos
+
+
+
+    def get_inventario_by_bodega(self, bodega_id):
+        inventario = ItemInventario.query.filter_by(bodega_id=bodega_id).all()
+        return inventario
+
+    

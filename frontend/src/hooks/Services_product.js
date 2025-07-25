@@ -134,3 +134,13 @@ export async function get_stock_by_producto(producto_id, token) {
 
 
 
+export async function get_productos_id(producto_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`producto/id/${producto_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500}
+    }
+    return datos.data;
+}

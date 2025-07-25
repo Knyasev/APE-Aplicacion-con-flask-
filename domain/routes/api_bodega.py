@@ -98,3 +98,17 @@ def get_bodega_by_id(bodega_id):
             jsonify({"msg": "ERROR", "code": 404, "datos": {"error": "Bodega no encontrada"}}),
             404
         )
+
+@api_bodega.route("/bodega/usuario/<usuario_id>", methods=["GET"])
+def get_bodega_by_usuario(usuario_id):
+    try:
+        bodega = bodegaC.bodega_by_usuario(usuario_id)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": bodega.serialize}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 404, "datos": {"error": str(e)}}),
+            404
+        )

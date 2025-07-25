@@ -90,3 +90,14 @@ export async function get_stock_by_bodega(bodega_id, token) {
     }
     return datos.data;
 }
+
+export async function get_bodega_by_usuario(usuario_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`bodega/usuario/${usuario_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+}

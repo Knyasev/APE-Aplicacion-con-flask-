@@ -28,10 +28,8 @@ class ProductoController():
 
     def get_producto_by_id(self, producto_id):
         producto = Producto.query.get(producto_id)
-        if not producto:
-            raise Exception("Producto no encontrado")
-        return producto
 
+        return producto
 
     def registrar_salida_producto(self, data):
         producto = Producto()

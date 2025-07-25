@@ -71,7 +71,7 @@ def listar_Movimiento_producto_por_fecha(producto_id):
         fecha_inicio = request.args.get('fecha_inicio')
         fecha_fin = request.args.get('fecha_fin')
 
-        movimientos = inventarioC.listar_Movimiento_producto_por_fecha(producto_id, fecha_inicio, fecha_fin)
+        movimientos = inventarioC.listar_Movimiento_producto(producto_id, fecha_inicio, fecha_fin)
         datos = [i.serialize() for i in movimientos]
         return make_response(
             jsonify({"msg": "OK", "code": 200, "datos": datos}),
@@ -122,3 +122,15 @@ def listar_tipos_comprobante():
         return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500
 
 
+
+@api_inventario.route('/inventario/bodega/<int:bodega_id>', methods=['GET'])
+def get_inventario_by_bodega(bodega_id):
+    try:
+        inventario = inventarioC.get_inventario_by_bodega(bodega_id)
+        datos = [i.serialize() for i in inventario]
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": datos}),
+            200
+        )
+    except Exception as e:
+        return jsonify({"msg": "ERROR", "code": 500, "error": str(e)}), 500

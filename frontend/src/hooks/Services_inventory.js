@@ -65,3 +65,26 @@ export async function get_inventory_by_producto(producto_id, token) {
     }
     return datos.data;
 }
+
+
+export async function get_inventory_by_fecha(fecha, token) {
+    let datos = null;
+    try {
+        datos = await GET(`inventario/${fecha}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+}
+
+export async function get_inventario_by_bodega(bodega_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`inventario/bodega/${bodega_id}`, token);
+    } catch (error) {
+        console.log(error.response.data);
+        return {"code": 500};
+    }
+    return datos.data;
+}

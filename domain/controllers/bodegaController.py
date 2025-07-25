@@ -59,4 +59,6 @@ class BodegaController:
 
             
             
-        
+    def bodega_by_usuario(self, usuario_id):
+        return  Bodega.query.filter_by(usuario_id=usuario_id).first()
+   

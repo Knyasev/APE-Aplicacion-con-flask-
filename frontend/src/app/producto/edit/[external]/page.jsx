@@ -15,7 +15,7 @@ export default function Edit({ params }) {
     const [usuario, setUsuario] = useState(null);
     const [producto, setProducto] = useState(null);
     const token = Cookies.get('token');
-    const external_id = Cookies.get('external');
+    const external_id = Cookies.get('external_id');
     const productExternalId = params.external;
 
     // Schema de validación simplificado
@@ -41,6 +41,7 @@ export default function Edit({ params }) {
         // Cargar información del usuario
         if (external_id) {
             get_person(token, external_id).then((info) => {
+                console.log("Usuario cargado:", info.datos);
                 if (info.code == '200') {
                     setUsuario(info.datos);
                 }
@@ -72,11 +73,10 @@ export default function Edit({ params }) {
             estado: 'BUENO', // Estado fijo
             categoria_id: data.categoria_id,
             stock_actual: data.stock_actual,
-            admin_id: usuario?.id
+            admin_id: usuario.id
         };
-
+        console.log("Datos del producto a enviar:", productoData); // Para depuración
         const info = await update_product(productoData, { external: productExternalId }, token);
-        console.log("Respuesta de actualización:", info);
         if (info && info.code == '200') {
             swal({
                 title: "Actualización exitosa",

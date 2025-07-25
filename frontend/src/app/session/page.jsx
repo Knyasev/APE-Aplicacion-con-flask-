@@ -45,7 +45,7 @@ export default function Session() {
           timer: 4000,
           closeOnEsc: true,
         });
-        router.push('/lote');
+        router.push('/Home');
         router.refresh();
       } else {
         swal({
