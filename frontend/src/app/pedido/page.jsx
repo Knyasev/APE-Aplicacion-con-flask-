@@ -9,7 +9,9 @@ import {
   get_pedido_by_usuario_sucursal, 
   get_detalles_pedido,
   cambiar_estado_entregado,
-  cambiar_estado_cancelado 
+  cambiar_estado_cancelado,
+  get_pedido_by_fecha_sucursal,
+  get_total_ventas_fecha
 } from "@/hooks/Services_pedido"
 import { get_product_by_id } from "@/hooks/Services_product"
 import swal from 'sweetalert'
@@ -25,17 +27,20 @@ function Pedidos() {
     const [detallesPedido, setDetallesPedido] = useState([])
     const [pedidoSeleccionado, setPedidoSeleccionado] = useState(null)
     const [loadingDetalles, setLoadingDetalles] = useState(false)
+    const [filtroFecha, setFiltroFecha] = useState('')
+    const [totalVentasFecha, setTotalVentasFecha] = useState(null)
+    const [mostrarTotalVentas, setMostrarTotalVentas] = useState(false)
     const token = Cookies.get('token')
     const external_id = Cookies.get('external_id')
     const router = useRouter()
 
     useEffect(() => {
         if (!isLoaded && token && external_id) {
-            cargarPedidos()
+            cargarDatosIniciales()
         }
     }, [isLoaded, token, external_id])
 
-    const cargarPedidos = async () => {
+    const cargarDatosIniciales = async () => {
         try {
             const personaInfo = await get_person(token, external_id)
             if (personaInfo.code !== 200) {
@@ -49,19 +54,49 @@ function Pedidos() {
             }
             
             setSucursal(sucursalInfo.datos)
-            const sucursal_id = sucursalInfo.datos.id
-            const pedidosInfo = await get_pedido_by_usuario_sucursal(admin_id, sucursal_id, token)
+            await cargarPedidos(admin_id, sucursalInfo.datos.id)
+        } catch (error) {
+            console.error("Error en la carga inicial:", error)
+            swal("Error", error.message || "Error al cargar los datos iniciales", "error")
+        } finally {
+            setIsLoaded(true)
+        }
+    }
+
+    const cargarPedidos = async (admin_id, sucursal_id, fecha = null) => {
+        try {
+            let pedidosInfo
+            if (fecha) {
+                pedidosInfo = await get_pedido_by_fecha_sucursal(fecha, sucursal_id, token)
+            } else {
+                pedidosInfo = await get_pedido_by_usuario_sucursal(admin_id, sucursal_id, token)
+            }
             
             if (pedidosInfo.code === 200) {
                 setPedidos(pedidosInfo.datos || [])
+                setMostrarTotalVentas(false)
+                setTotalVentasFecha(null)
             } else {
                 throw new Error(pedidosInfo.datos?.error || "Error al obtener pedidos")
             }
         } catch (error) {
             console.error("Error en la carga de pedidos:", error)
             swal("Error", error.message || "Error al cargar los pedidos", "error")
-        } finally {
-            setIsLoaded(true)
+        }
+    }
+
+    const cargarTotalVentasFecha = async (fecha, sucursal_id) => {
+        try {
+            const resultado = await get_total_ventas_fecha(sucursal_id, fecha, token)
+            if (resultado.code === 200) {
+                console.log("Total ventas fecha:", resultado.datos)
+                setTotalVentasFecha(resultado.datos)
+                setMostrarTotalVentas(true)
+            } else {
+                throw new Error(resultado.datos?.error || "Error al obtener total de ventas")
+            }
+        } catch (error) {
+            swal("Error", error.message, "error")
         }
     }
 
@@ -70,7 +105,7 @@ function Pedidos() {
             const resultado = await cambiar_estado_entregado(pedido.external_id, token);
             if (resultado.code === 200) {
                 swal("Éxito", "Pedido marcado como entregado", "success");
-                cargarPedidos();
+                cargarDatosIniciales();
                 setShowModal(false);
             } else {
                 throw new Error(resultado.datos?.error || "Error al cambiar estado");
@@ -85,7 +120,7 @@ function Pedidos() {
             const resultado = await cambiar_estado_cancelado(pedido.external_id, token);
             if (resultado.code === 200) {
                 swal("Éxito", "Pedido cancelado correctamente", "success");
-                cargarPedidos();
+                cargarDatosIniciales();
                 setShowModal(false);
             } else {
                 throw new Error(resultado.datos?.error || "Error al cancelar pedido");
@@ -134,26 +169,67 @@ function Pedidos() {
         }
     }
 
+    const aplicarFiltros = () => {
+        let pedidosFiltrados = [...pedidos]
+
+        if (filtroFecha) {
+            pedidosFiltrados = pedidosFiltrados.filter(pedido => 
+                new Date(pedido.fecha).toISOString().split('T')[0] === filtroFecha
+            )
+        }
+
+        return pedidosFiltrados
+    }
+
+    const buscarPorFecha = async () => {
+        if (!filtroFecha) {
+            swal("Advertencia", "Por favor selecciona una fecha", "warning")
+            return
+        }
+
+        try {
+            const personaInfo = await get_person(token, external_id)
+            if (personaInfo.code !== 200) throw new Error("Error al obtener información de la persona")
+            
+            await cargarPedidos(personaInfo.datos.id, sucursal.id, filtroFecha)
+        } catch (error) {
+            swal("Error", error.message, "error")
+        }
+    }
+
     const formatFecha = (fechaString) => {
         if (!fechaString) return 'N/A'
-        const fecha = new Date(fechaString)
+        const fecha = new Date(`${fechaString}T00:00:00`)
         return fecha.toLocaleDateString('es-ES', {
             year: 'numeric',
             month: 'long',
             day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
         })
     }
 
     const getEstadoBadge = (estado) => {
         const estados = {
             'CREADO': 'bg-primary',
-            'EN_PROCESO': 'bg-warning text-dark',
-            'COMPLETADO': 'bg-success',
+            'ENVIADO': 'bg-warning text-dark',
+            'ENTREGADO': 'bg-success',
             'CANCELADO': 'bg-danger'
         }
         return estados[estado] || 'bg-secondary'
+    }
+
+    const limpiarFiltros = async () => {
+        setFiltroFecha('')
+        setMostrarTotalVentas(false)
+        setTotalVentasFecha(null)
+        
+        try {
+            const personaInfo = await get_person(token, external_id)
+            if (personaInfo.code !== 200) throw new Error("Error al obtener información de la persona")
+            
+            await cargarPedidos(personaInfo.datos.id, sucursal.id)
+        } catch (error) {
+            swal("Error", error.message, "error")
+        }
     }
 
     return (
@@ -164,6 +240,59 @@ function Pedidos() {
                     <h2>Pedidos de {sucursal?.nombre || 'Sucursal'}</h2>
                     <Link href="/pedido/new" className="btn btn-info">Nuevo Pedido</Link>
                 </div>
+                
+                {/* Filtro por fecha */}
+                <div className="card mb-4">
+                    <div className="card-header bg-dark text-white">
+                        <h5>Filtrar por fecha</h5>
+                    </div>
+                    <div className="card-body">
+                        <div className="row">
+                            <div className="col-md-8">
+                                <label htmlFor="filtroFecha" className="form-label">Selecciona una fecha</label>
+                                <div className="input-group">
+                                    <input 
+                                        type="date" 
+                                        className="form-control" 
+                                        id="filtroFecha"
+                                        value={filtroFecha}
+                                        onChange={(e) => setFiltroFecha(e.target.value)}
+                                    />
+                                    <button 
+                                        className="btn btn-primary"
+                                        onClick={buscarPorFecha}
+                                    >
+                                        Buscar
+                                    </button>
+                                    {filtroFecha && (
+                                        <button 
+                                            className="btn btn-success"
+                                            onClick={() => cargarTotalVentasFecha(filtroFecha, sucursal?.id)}
+                                        >
+                                            Ver Total Ventas
+                                        </button>
+                                    )}
+                                </div>
+                            </div>
+                            <div className="col-md-4 d-flex align-items-end">
+                                <button 
+                                    className="btn btn-secondary w-100"
+                                    onClick={limpiarFiltros}
+                                >
+                                    Mostrar Todos
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                {mostrarTotalVentas && totalVentasFecha !== null && (
+                    <div className="alert alert-success mb-3">
+                        <h4>Total de ventas para el {formatFecha(filtroFecha)}: ${totalVentasFecha.toFixed(2) || '0.00'}</h4>
+                        
+                    </div>
+                )}
+                
                 <div className="container-fluid">
                     <table className="table table-hover">
                         <thead className="table-dark">
@@ -179,8 +308,8 @@ function Pedidos() {
                         </thead>
                         <tbody>
                             {isLoaded ? (
-                                pedidos.length > 0 ? (
-                                    pedidos.map((pedido, i) => (
+                                aplicarFiltros().length > 0 ? (
+                                    aplicarFiltros().map((pedido, i) => (
                                         <tr key={i}>
                                             <td>{i + 1}</td>
                                             <td>{formatFecha(pedido.fecha)}</td>
@@ -232,7 +361,9 @@ function Pedidos() {
                                     ))
                                 ) : (
                                     <tr>
-                                        <td colSpan="7" className="text-center py-4">No hay pedidos registrados</td>
+                                        <td colSpan="7" className="text-center py-4">
+                                            {filtroFecha ? "No hay pedidos para la fecha seleccionada" : "No hay pedidos registrados"}
+                                        </td>
                                     </tr>
                                 )
                             ) : (
@@ -249,6 +380,7 @@ function Pedidos() {
                 </div>
             </main>
 
+            {/* Modal de Detalles */}
             {showModal && (
                 <div className="modal-backdrop" style={{
                     position: 'fixed',

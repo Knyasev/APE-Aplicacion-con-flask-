@@ -103,7 +103,7 @@ export async function get_sucursal_by_bodega_id(bodega_id, token) {
 export async function get_sucursal_by_usuario(admin_id, token) {
     let datos = null;
     try {
-        datos = await GET(`/sucursal/usuario/${admin_id}`, token);
+        datos = await GET(`sucursal/usuario/${admin_id}`, token);
     } catch (error) {
         console.log(error.response.data);
         return {"code": 500}

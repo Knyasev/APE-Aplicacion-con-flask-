@@ -68,7 +68,13 @@ const Menu = ({ children }) => {
               </div>
             </>
           )}
-
+          {(rol === "BODEGUERO" ||  rol === "PERSONAL") && (
+            <div className="mt-4">
+              <Link href="/stock" className="text-white hover:text-gray-300 no-underline flex items-center">
+                <FaBox className="mr-2"/> Stock
+              </Link>
+            </div>
+          )}
           {rol === "PERSONAL" && (
             <div className="mt-4">
               <Link href="/pedido" className="text-white hover:text-gray-300 no-underline flex items-center">
@@ -84,11 +90,7 @@ const Menu = ({ children }) => {
                 <FaBox className="mr-2"/> Inventario
               </Link>
             </div>
-            <div className="mt-4">
-              <Link href="/stock" className="text-white hover:text-gray-300 no-underline flex items-center">
-                <FaBox className="mr-2"/> Stock
-              </Link>
-            </div></>
+            </>
             
           )}
 

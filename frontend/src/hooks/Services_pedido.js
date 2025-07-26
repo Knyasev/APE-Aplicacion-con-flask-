@@ -98,11 +98,33 @@ export async function cambiar_estado_entregado(external, token) {
     }
     return datos.data;
 }
-
+//http://localhost:5000/pedido/caja/cierre/1/2025-07-20
 export async function cambiar_estado_cancelado(external, token) {
     let datos = null;
     try {
         datos = await GET(`pedido/cancelar/${external}`, token);
+    } catch (error) {
+        console.error(error);
+        return {"code": 500, "datos": error.response.data};
+    }
+    return datos.data;
+}
+//http://localhost:5000/pedido/sucursal/1/fecha/2025-07-20
+export async function get_pedido_by_fecha_sucursal(fecha, sucursal_id, token) {
+    let datos = null;
+    try {
+        datos = await GET(`pedido/sucursal/${sucursal_id}/fecha/${fecha}`, token);
+    } catch (error) {
+        console.error(error);
+        return {"code": 500, "datos": error.response.data};
+    }
+    return datos.data;
+}
+
+export async function get_total_ventas_fecha( sucursal_id,fecha, token) {
+    let datos = null;
+    try {
+        datos = await GET(`pedido/caja/cierre/${sucursal_id}/${fecha}`, token);
     } catch (error) {
         console.error(error);
         return {"code": 500, "datos": error.response.data};
