@@ -127,3 +127,39 @@ def cambiar_estado_entregado(external_id):
             jsonify({"msg": "ERROR", "code": 400, "datos": {"error": str(e)}}),
             400
         )
+
+
+@api_pedido.route("/pedido/caja/cierre/<sucursal_id>/<fecha>", methods=["GET"])
+def realizar_caja_cierre(sucursal_id, fecha):   
+    try:
+        cierre = pedidoC.realizar_caja_cierre(sucursal_id, fecha)
+        return make_response(
+            jsonify({"msg": "OK", "code": 200, "datos": cierre}),
+            200
+        )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 400, "datos": {"error": str(e)}}),
+            400
+        )
+
+
+@api_pedido.route("/pedido/sucursal/<sucursal_id>/fecha/<fecha>", methods=["GET"])
+def listar_cierre_sucursal_fecha(sucursal_id, fecha):
+    try:
+        cierres = pedidoC.get_pedidos_por_fecha(sucursal_id, fecha)
+        if cierres:
+            return make_response(
+                jsonify({"msg": "OK", "code": 200, "datos": ([i.serialize for i in cierres])}),
+                200
+            )
+        else:
+            return make_response(
+                jsonify({"msg": "ERROR", "code": 400, "datos": {"error": "No se encontraron cierres para la sucursal y fecha especificadas"}}),
+                400
+            )
+    except Exception as e:
+        return make_response(
+            jsonify({"msg": "ERROR", "code": 400, "datos": {"error": str(e)}}),
+            400
+        )

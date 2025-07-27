@@ -133,4 +133,24 @@ class PedidoController:
         return pedido.id
 
 
-    
+    def realizar_caja_cierre(self, sucursal_id, fecha):
+        """
+        Realiza el cierre de caja para una sucursal específica.
+        """
+        pedidos = Pedido.query.filter_by(sucursal_id=sucursal_id, fecha=fecha, estado=EstadoPedido.ENTREGADO).all()
+        if not pedidos:
+            raise Error("No se encontraron pedidos para la sucursal y fecha especificadas")
+        
+        total_ventas = sum(pedido.precio_total for pedido in pedidos)
+        # Aquí podrías agregar lógica adicional para registrar el cierre de caja
+        return total_ventas
+
+    def get_pedidos_por_fecha(self, sucursal_id, fecha):
+        """
+        Obtiene los pedidos realizados en una sucursal en una fecha específica.
+        """
+        pedidos = Pedido.query.filter_by(sucursal_id=sucursal_id, fecha=fecha).all()
+        if not pedidos:
+            raise Error("No se encontraron pedidos para la sucursal y fecha especificadas")
+        
+        return pedidos
