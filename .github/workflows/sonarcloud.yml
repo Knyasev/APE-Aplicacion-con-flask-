@@ -13,6 +13,10 @@ jobs:
   sonarcloud:
     runs-on: ubuntu-latest
 
+    defaults:
+      run:
+        working-directory: domain
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
